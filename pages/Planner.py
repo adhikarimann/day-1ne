@@ -1,5 +1,7 @@
 import streamlit as st
 
+from utils.ai_helper import generate_study_plan
+
 st.set_page_config(
     page_title="Planner",
     page_icon="🧠",
@@ -29,20 +31,21 @@ with st.form("planner_form"):
         ["Low", "Medium", "High"]
     )
 
-    submitted = st.form_submit_button("Generate Plan")
+    submitted = st.form_submit_button("Generate AI Plan")
 
 if submitted:
 
-    st.session_state.exam = exam
-    st.session_state.subjects = subjects
-    st.session_state.hours = hours
-    st.session_state.confidence = confidence
+    with st.spinner("Generating realistic study strategy..."):
 
-    st.success("Study profile saved successfully.")
+        ai_response = generate_study_plan(
+            exam,
+            subjects,
+            hours,
+            confidence
+        )
 
-    st.subheader("Your Study Profile")
+    st.success("AI Study Plan Generated")
 
-    st.write(f"📘 Exam: {exam}")
-    st.write(f"📚 Subjects: {subjects}")
-    st.write(f"⏰ Hours/Day: {hours}")
-    st.write(f"🎯 Confidence: {confidence}")
+    st.subheader("📘 Your AI Guidance")
+
+    st.write(ai_response)
