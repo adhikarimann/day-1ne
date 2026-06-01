@@ -39,4 +39,18 @@ with col3:
 
 st.divider()
 
+st.subheader("🚀 Current Features")
+
+st.info("""
+🧠 AI-Powered Study Planner
+
+📚 Dynamic Subject Management
+
+🎯 Realistic Academic Strategies
+
+⚡ Academic Reality Assessment
+
+🔄 Continuous Improvements
+""")
+
 st.caption("Built with Streamlit + Python")
