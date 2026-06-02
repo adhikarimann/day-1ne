@@ -21,116 +21,267 @@ def generate_study_plan(
     consistency,
     extra_context
 ):
-    
+
     # ========================
     # CALCULATE KEY METRICS
     # ========================
-    
+
     days_remaining = (exam_date - datetime.now().date()).days
     days_remaining = max(days_remaining, 1)
-    total_chapters = sum(s["chapters_remaining"] for s in subject_data.values())
-    avg_confidence = (sum(s["confidence"] for s in subject_data.values()) / len(subject_data)) if len(subject_data) > 0 else 0
+
+    total_chapters = sum(
+        s["chapters_remaining"]
+        for s in subject_data.values()
+    )
+
+    avg_confidence = (
+        sum(
+            s["confidence"]
+            for s in subject_data.values()
+        ) / len(subject_data)
+    ) if len(subject_data) > 0 else 0
+
     total_study_hours = days_remaining * hours
-    chapters_per_day = total_chapters / days_remaining if days_remaining > 0 else 0
-    
+
+    chapters_per_day = (
+        total_chapters / days_remaining
+        if days_remaining > 0
+        else 0
+    )
+
     # ========================
     # SYSTEM PROMPT
     # ========================
-    
-    system_prompt = """You are DAY-1NE, an honest academic strategist built for overwhelmed students.
+
+    system_prompt = """
+You are DAY-1NE, an honest strategist built for overwhelmed students and learners.
 
 Your core values:
-- NEVER use motivational platitudes or fake hype
-- ALWAYS be brutally honest about feasibility
-- PRIORITIZE clarity and realism over optimism
+- NEVER use motivational platitudes
+- ALWAYS be brutally honest
+- PRIORITIZE realism over optimism
 - REJECT generic productivity advice
-- FOCUS on execution over fantasy planning
-- ACKNOWLEDGE burnout and consistency challenges
+- FOCUS on execution
+- ACKNOWLEDGE burnout and consistency issues
 
-You analyze academic situations with surgical precision and deliver actionable, realistic roadmaps.
-Your tone: calm, mature, direct, compassionate but honest."""
+Before answering:
+1. Understand what the user is actually trying to achieve.
+2. Decide whether this is:
+   - Exam Preparation
+   - Skill Learning
+   - Career Development
+   - General Productivity
+3. Adapt accordingly.
+
+Your tone:
+calm, mature, direct, practical.
+"""
 
     # ========================
     # BUILD SUBJECT BREAKDOWN
     # ========================
-    
+
     subject_breakdown = ""
+
     for subject, data in subject_data.items():
-        subject_breakdown += f"- {subject}: {data['chapters_remaining']} topics/chapters | Confidence: {data['confidence']}/10\n"
-    
+
+        subject_breakdown += (
+            f"- {subject}: "
+            f"{data['chapters_remaining']} topics/chapters | "
+            f"Confidence: {data['confidence']}/10\n"
+        )
+
     # ========================
-    # MAIN PROMPT
+    # DETECT SKILL LEARNING
     # ========================
-    
-    prompt = f"""
-STUDENT PROFILE:
+
+    combined_text = (
+        exam.lower()
+        + " "
+        + (extra_context.lower() if extra_context else "")
+        + " "
+        + " ".join(subject.lower() for subject in subject_data.keys())
+    )
+
+    skill_keywords = [
+        "dsa",
+        "leetcode",
+        "coding",
+        "programming",
+        "web development",
+        "webdev",
+        "frontend",
+        "backend",
+        "python",
+        "java",
+        "c++",
+        "javascript",
+        "machine learning",
+        "ml",
+        "ai",
+        "artificial intelligence",
+        "data science",
+        "skill",
+        "learn"
+    ]
+
+    is_skill_learning = any(
+        keyword in combined_text
+        for keyword in skill_keywords
+    )
+
+    # ========================
+    # SKILL LEARNING MODE
+    # ========================
+
+    if is_skill_learning:
+
+        prompt = f"""
+USER PROFILE
 ================
 
-Exam: {exam}
-Exam Date: {exam_date} ({days_remaining} days away)
-Exam Format: {exam_format}
+Learning Goal:
+{exam}
 
-ACADEMICS:
-- Total Topics/Chapters Remaining: {total_chapters}
-- Topics Per Day Needed (if uniform): {chapters_per_day:.2f}
-- Average Confidence Across Subjects: {avg_confidence:.1f}/10
-- Total Available Study Hours: {total_study_hours} hours
-
-SUBJECT BREAKDOWN:
+Topics / Skills:
 {subject_breakdown}
 
-EXECUTION CAPACITY:
-- Study Hours/Day: {hours}
-- Burnout Level: {burnout}
-- Consistency: {consistency}
+Available Hours Per Day:
+{hours}
 
-ADDITIONAL CONTEXT:
+Burnout:
+{burnout}
+
+Consistency:
+{consistency}
+
+Additional Context:
 {extra_context if extra_context else "None provided"}
 
 ================
-YOUR TASK:
+YOUR TASK
 ================
 
-Analyze this student's situation and provide a REALISTIC, STRUCTURED strategy.
+The user is trying to learn a skill.
 
-OUTPUT FORMAT (Follow exactly):
+Do NOT treat this as an exam.
+
+Think like an experienced mentor.
+
+Understand:
+- current level
+- learning goal
+- available time
+- realistic progress expectations
+
+OUTPUT FORMAT:
+
+## 🎯 LEARNING ASSESSMENT
+Assess their current situation.
+
+## 🗺️ RECOMMENDED ROADMAP
+Suggest the ideal topic order.
+
+## 📅 30-DAY PLAN
+Give a week-by-week roadmap.
+
+## 💡 DAILY LEARNING SYSTEM
+Show how to use {hours} hours/day.
+
+## ⚠️ COMMON MISTAKES TO AVOID
+Specific mistakes beginners make.
+
+## 🚀 NEXT MILESTONE
+What success should look like after 30 days.
+
+CRITICAL RULES:
+
+- Do NOT discuss exam pressure.
+- Do NOT discuss syllabus completion.
+- Do NOT invent academic risks.
+- Focus on skill acquisition.
+- Be practical and specific.
+"""
+
+    # ========================
+    # EXAM MODE
+    # ========================
+
+    else:
+
+        prompt = f"""
+STUDENT PROFILE
+================
+
+Exam:
+{exam}
+
+Exam Date:
+{exam_date}
+
+Days Remaining:
+{days_remaining}
+
+Exam Format:
+{exam_format}
+
+ACADEMICS:
+
+- Total Topics Remaining: {total_chapters}
+- Topics Per Day Needed: {chapters_per_day:.2f}
+- Average Confidence: {avg_confidence:.1f}/10
+- Total Available Study Hours: {total_study_hours}
+
+SUBJECT BREAKDOWN:
+
+{subject_breakdown}
+
+EXECUTION CAPACITY:
+
+- Hours Per Day: {hours}
+- Burnout: {burnout}
+- Consistency: {consistency}
+
+ADDITIONAL CONTEXT:
+
+{extra_context if extra_context else "None provided"}
+
+================
+YOUR TASK
+================
+
+Analyze this student's situation.
+
+OUTPUT FORMAT:
 
 ## 📊 SITUATION ANALYSIS
-[Honest assessment of feasibility. Include: time pressure, workload realism, confidence gaps, risk factors]
 
 ## ⚠️ CRITICAL WEAK AREAS
-[Rank subjects/areas by risk (1=highest risk). Which subjects have lowest confidence + highest workload?]
 
 ## 🎯 PRIORITY STRATEGY
-[For {exam}, what's the smart prioritization? Which subjects matter most? Which can be optimized?]
 
 ## 📋 REALISTIC ALLOCATION PLAN
-[Show how to distribute {hours} hours/day across {len(subject_data)} subject(s) over {days_remaining} days]
 
 ## 💡 DAILY EXECUTION BLUEPRINT
-[Give a sample daily routine with specific subjects/topics. Be concrete.]
 
 ## 🚨 BURNOUT + CONSISTENCY REALITY CHECK
-[Their burnout is {burnout} and consistency is {consistency}. Is this sustainable? What needs adjustment?]
 
 ## 🎓 HONEST FINAL ADVICE
-[End with 2-3 sentences of real, grounded guidance. No BS - just truth.]
 
-================
 CRITICAL RULES:
-================
-- If completing all chapters is unrealistic, say it. Suggest damage-control prioritization.
-- Account for their confidence levels - weaker subjects need more time
-- Their consistency level ({consistency}) matters: if "Very Poor", suggest smaller daily commitments
-- With {burnout} burnout level, don't suggest unsustainable schedules
-- Be specific about which topics/chapters to focus on vs. which to optimize/skip
-- Don't use generic productivity tips - focus on their specific subjects and timeline
+
+- Be brutally realistic.
+- Mention feasibility clearly.
+- Account for confidence levels.
+- Account for burnout.
+- Avoid generic advice.
+- Focus on practical execution.
 """
 
     # ========================
     # CALL GROQ
     # ========================
-    
+
     response = client.chat.completions.create(
         model="llama-3.1-8b-instant",
         messages=[
