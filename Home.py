@@ -53,4 +53,4 @@ st.info("""
 🔄 Continuous Improvements
 """)
 
-st.caption("Built with Streamlit + Python")
+st.caption("Built with ❤️ & a bit of 🐍 & Streamlit!")
