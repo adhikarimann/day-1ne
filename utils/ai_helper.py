@@ -85,11 +85,21 @@ calm, mature, direct, practical.
 
     for subject, data in subject_data.items():
 
-        subject_breakdown += (
-            f"- {subject}: "
-            f"{data['chapters_remaining']} topics/chapters | "
-            f"Confidence: {data['confidence']}/10\n"
-        )
+        topics_str = data.get("topics", "").strip()
+
+        if topics_str:
+            subject_breakdown += (
+                f"- {subject}: "
+                f"{data['chapters_remaining']} topics/chapters | "
+                f"Confidence: {data['confidence']}/10 | "
+                f"Remaining Topics: {topics_str}\n"
+            )
+        else:
+            subject_breakdown += (
+                f"- {subject}: "
+                f"{data['chapters_remaining']} topics/chapters | "
+                f"Confidence: {data['confidence']}/10\n"
+            )
 
     # ========================
     # DETECT SKILL LEARNING
@@ -174,22 +184,27 @@ Understand:
 - available time
 - realistic progress expectations
 
+Where specific topics are listed for a skill area, use them directly
+to sequence the roadmap. Do NOT invent generic topic lists if the
+user has already provided their own.
+
 OUTPUT FORMAT:
 
 ## 🎯 LEARNING ASSESSMENT
 Assess their current situation.
 
 ## 🗺️ RECOMMENDED ROADMAP
-Suggest the ideal topic order.
+Suggest the ideal topic order. If the user listed specific topics,
+sequence THOSE topics. Do not substitute with generic ones.
 
 ## 📅 30-DAY PLAN
-Give a week-by-week roadmap.
+Give a week-by-week roadmap referencing the user's actual topics.
 
 ## 💡 DAILY LEARNING SYSTEM
 Show how to use {hours} hours/day.
 
 ## ⚠️ COMMON MISTAKES TO AVOID
-Specific mistakes beginners make.
+Specific mistakes beginners make with these exact topics.
 
 ## 🚀 NEXT MILESTONE
 What success should look like after 30 days.
@@ -201,6 +216,7 @@ CRITICAL RULES:
 - Do NOT invent academic risks.
 - Focus on skill acquisition.
 - Be practical and specific.
+- Reference the user's actual topic names wherever possible.
 """
 
     # ========================
@@ -252,15 +268,22 @@ YOUR TASK
 
 Analyze this student's situation.
 
+Where specific topic names are listed under a subject, use them
+directly in your recommendations. Prioritize, sequence, and
+reference those exact topics. Do NOT replace them with generic ones.
+
 OUTPUT FORMAT:
 
 ## 📊 SITUATION ANALYSIS
 
 ## ⚠️ CRITICAL WEAK AREAS
+Call out specific topics by name where confidence is low.
 
 ## 🎯 PRIORITY STRATEGY
+Which topics to hit first and why, referencing actual topic names.
 
 ## 📋 REALISTIC ALLOCATION PLAN
+Day-by-day or week-by-week plan using the listed topics.
 
 ## 💡 DAILY EXECUTION BLUEPRINT
 
@@ -276,6 +299,7 @@ CRITICAL RULES:
 - Account for burnout.
 - Avoid generic advice.
 - Focus on practical execution.
+- Reference the user's actual topic names wherever possible.
 """
 
     # ========================

@@ -149,9 +149,17 @@ with st.form("planner_form"):
                     key=f"confidence_{subject}"
                 )
 
+            topics_remaining = st.text_area(
+                f"Topics Remaining",
+                placeholder="e.g., SHM, Rotation, Electrostatics, Modern Physics",
+                key=f"topics_{subject}",
+                help="List the specific topics you still need to cover (comma-separated or one per line)."
+            )
+
             subject_data[subject] = {
                 "chapters_remaining": chapters_remaining,
-                "confidence": confidence
+                "confidence": confidence,
+                "topics": topics_remaining
             }
 
     else:
